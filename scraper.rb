@@ -1,16 +1,8 @@
 #!/bin/env ruby
-# encoding: utf-8
 # frozen_string_literal: true
 
-require 'everypolitician'
-require 'pry'
+require 'scraped'
 require 'scraperwiki'
+require_relative 'lib/cabinet'
 
-require_relative 'lib/politician'
-
-ScraperWiki.sqliteexecute('DROP TABLE data') rescue nil
-house = EveryPolitician::Index.new.country('Chile').lower_house
-house.popolo.persons.map(&:wikidata).compact.each_slice(100) do |wanted|
-  data = Wikisnakker::Politician.find(wanted).flat_map(&:positions).compact
-  ScraperWiki.save_sqlite(%i(id position start_date), data)
-end
+Scraped::Scraper.new('Q18067639' => CabinetScraper).store(:memberships, index: %i[position_id])
